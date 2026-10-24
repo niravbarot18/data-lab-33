@@ -395,18 +395,19 @@ docker compose down
 
 ## 17. Deployment Architecture
 
-WindIQ is deployed across two independent cloud platforms:
-- **Frontend:** Hosted on **Vercel** as a high-performance React 19 Single Page Application.
-- **Backend API:** Hosted on **Heroku** as an ASGI FastAPI service connecting to Elexon BMRS.
+WindIQ uses a **Vercel-only cloud architecture** hosting both the frontend and backend in a unified project deployment:
+- **Frontend:** React 19 Single Page Application built with Vite and served globally via Vercel's Edge Network CDN.
+- **Backend API:** FastAPI application running as a Vercel Python Serverless Function (`api/index.py`), handling API requests (`/api/analysis`, `/api/health`, `/health`) and interfacing directly with the Elexon BMRS API.
 
 ```text
 [ User Browser ]
        │
-       ├─► [ Vercel ]  ──► React 19 Frontend (SPA)
-       │
-       └─► [ Heroku ]  ──► FastAPI Backend API (/api/analysis, /health)
-                               │
-                               └─► Elexon BMRS API v1
+       ▼
+[ Vercel Unified Project ]
+       ├── Static SPA Routes (/*)  ──► React 19 / Vite Bundle
+       └── Serverless API (/api/*) ──► FastAPI (Python 3.12 Runtime)
+                                            │
+                                            └─► Elexon BMRS API v1
 ```
 
 ---

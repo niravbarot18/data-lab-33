@@ -105,8 +105,9 @@ async def root_health():
     }
 
 
-# Mount API routes
+# Mount API routes (supports both /api/path and /path)
 app.include_router(router, prefix="/api")
+app.include_router(router)
 
 
 if __name__ == "__main__":
