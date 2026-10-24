@@ -396,8 +396,9 @@ docker compose down
 ## 17. Deployment Architecture
 
 WindIQ uses a **Vercel-only cloud architecture** hosting both the frontend and backend in a unified project deployment:
+- **Live Application:** [https://windiq-insights.vercel.app](https://windiq-insights.vercel.app)
 - **Frontend:** React 19 Single Page Application built with Vite and served globally via Vercel's Edge Network CDN.
-- **Backend API:** FastAPI application running as a Vercel Python Serverless Function (`api/index.py`), handling API requests (`/api/analysis`, `/api/health`, `/health`) and interfacing directly with the Elexon BMRS API.
+- **Backend API:** FastAPI application running as a Vercel Python Serverless Function, handling API requests (`/api/analysis`, `/api/health`, `/health`) and interfacing directly with the Elexon BMRS API.
 
 ```text
 [ User Browser ]
