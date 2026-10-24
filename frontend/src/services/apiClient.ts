@@ -1,10 +1,24 @@
 import { AppApiError } from '../utils/errors';
 import type { ApiErrorResponse } from '../types/forecast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+function getResolvedApiUrl(endpoint: string): URL {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL || '/api').trim();
+  let base = envUrl.replace(/\/$/, '');
+  const cleanEndpoint = endpoint.replace(/^\//, '');
+
+  if ((base.startsWith('http://') || base.startsWith('https://')) && !base.endsWith('/api')) {
+    base = `${base}/api`;
+  }
+
+  if (base.startsWith('http://') || base.startsWith('https://')) {
+    return new URL(`${base}/${cleanEndpoint}`);
+  }
+
+  return new URL(`${base}/${cleanEndpoint}`, window.location.origin);
+}
 
 export async function apiGet<T>(endpoint: string, params?: Record<string, string>, signal?: AbortSignal): Promise<T> {
-  const url = new URL(`${API_BASE_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`, window.location.origin);
+  const url = getResolvedApiUrl(endpoint);
 
   if (params) {
     Object.entries(params).forEach(([key, val]) => {

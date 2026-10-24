@@ -1,4 +1,6 @@
-from typing import List
+from typing import List, Union
+import json
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,6 +16,21 @@ class Settings(BaseSettings):
     DEFAULT_TIMEZONE: str = "Europe/London"
     CACHE_TTL_SECONDS: int = 300
     CACHE_MAX_ITEMS: int = 100
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            v_str = v.strip()
+            if v_str.startswith("[") and v_str.endswith("]"):
+                try:
+                    return json.loads(v_str)
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v_str.split(",") if origin.strip()]
+        elif isinstance(v, list):
+            return v
+        return []
 
     model_config = SettingsConfigDict(
         env_file=".env",
