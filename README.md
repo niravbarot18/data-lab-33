@@ -393,115 +393,29 @@ docker compose down
 
 ---
 
-## 17. Cloud Deployment Guide (Heroku Backend & Vercel Frontend)
+## 17. Deployment Architecture
 
-WindIQ is architected for independent, zero-friction cloud deployment using **Heroku** for the FastAPI backend and **Vercel** for the React TypeScript frontend.
-
-### Architecture in Production
+WindIQ is deployed across two independent cloud platforms:
+- **Frontend:** Hosted on **Vercel** as a high-performance React 19 Single Page Application.
+- **Backend API:** Hosted on **Heroku** as an ASGI FastAPI service connecting to Elexon BMRS.
 
 ```text
 [ User Browser ]
        │
-       ├─► [ Vercel CDN ] ──► React 19 SPA (Static Bundle)
+       ├─► [ Vercel ]  ──► React 19 Frontend (SPA)
        │
-       └─► [ Heroku Dyno ] ──► FastAPI (ASGI via Uvicorn)
-                                   │
-                                   └─► Elexon BMRS API v1
+       └─► [ Heroku ]  ──► FastAPI Backend API (/api/analysis, /health)
+                               │
+                               └─► Elexon BMRS API v1
 ```
-
----
-
-### Step 1: Deploy Backend to Heroku
-
-The repository includes both root and `backend/` platform definitions (`Procfile`, `runtime.txt`, `requirements.txt`), allowing deployment directly from the GitHub repository or via the Heroku CLI.
-
-#### Option A: Deploy via Heroku Dashboard (Recommended)
-1. Log into your [Heroku Dashboard](https://dashboard.heroku.com/) and click **New** > **Create new app** (e.g. `windiq-backend-<unique-id>`).
-2. Navigate to the **Deploy** tab:
-   - Select **GitHub** as the deployment method.
-   - Search for and connect your repository: `niravbarot18/data-lab-33`.
-   - In the **Manual deploy** section, select branch `main` and click **Deploy Branch**.
-3. Configure Environment Variables in the **Settings** tab > **Config Vars**:
-   - `CORS_ORIGINS`: `https://*.vercel.app,http://localhost:5173` (or your exact Vercel frontend domain)
-   - `ELEXON_API_BASE_URL`: `https://data.elexon.co.uk/bmrs/api/v1` (optional default)
-   - `DEFAULT_CUTOFF_TIME`: `09:50`
-   - `DEFAULT_TIMEZONE`: `Europe/London`
-4. Verify the backend health:
-   - Open `https://<your-heroku-app>.herokuapp.com/health` in your browser.
-   - Expected JSON: `{"status": "ok", "service": "windiq-api"}`
-
-#### Option B: Deploy via Heroku CLI
-```bash
-# Log in to Heroku
-npx heroku login
-
-# Create a new Heroku app
-npx heroku create windiq-api-<your-id>
-
-# Set production configuration variables
-npx heroku config:set CORS_ORIGINS="https://*.vercel.app" -a windiq-api-<your-id>
-
-# Push backend to Heroku
-git push heroku main
-
-# Verify deployment health
-curl https://windiq-api-<your-id>.herokuapp.com/health
-```
-
----
-
-### Step 2: Deploy Frontend to Vercel
-
-The frontend includes `frontend/vercel.json` and client configuration to seamlessly connect to the deployed backend.
-
-#### Option A: Deploy via Vercel Dashboard (Recommended)
-1. Log into your [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New...** > **Project**.
-2. Import the Git Repository: `niravbarot18/data-lab-33`.
-3. In the project configuration:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: Click edit and select `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-4. Expand **Environment Variables**:
-   - Key: `VITE_API_BASE_URL`
-   - Value: `https://<your-heroku-app>.herokuapp.com/api` (the Heroku backend URL from Step 1)
-5. Click **Deploy**.
-
-#### Option B: Deploy via Vercel CLI
-```bash
-# Log in to Vercel
-npx vercel login
-
-# Link and deploy from the frontend directory
-cd frontend
-npx vercel --prod
-```
-
----
-
-### Step 3: End-to-End Verification Checklist
-
-Once both services are deployed:
-1. **Frontend Availability**: Open the Vercel production URL (e.g. `https://data-lab-33.vercel.app`).
-2. **Backend Communication**: Verify the KPI cards, Decision Context Panel, and charts load data for the default decision date (`15/01/2026`, cutoff `09:50`).
-3. **Interactive Controls**:
-   - Change the Decision Date (e.g. `20/01/2026`) and verify data updates.
-   - Change the Cutoff Time (e.g. `10:00`, `12:00`) and verify instant recalculation and vintage updates.
-4. **Error Handling**: Select a date with partial data (e.g. `05/01/2026`) and verify the `Partial Data Coverage · 24/48 periods` status banner renders accurately.
 
 ---
 
 ## 18. AI Tool Disclosure
 
-In compliance with the challenge submission requirements, the use of AI tools during the development of this repository is transparently disclosed below:
-
-- **AI Tools Used:** Google Antigravity AI Coding Assistant powered by advanced Gemini models.
-- **Areas of AI Assistance:**
-  - Automated inspection and validation of the official Elexon BMRS OpenAPI specification (`/datasets/FUELHH/stream` and `/datasets/WINDFOR/stream`).
-  - Architecture scaffolding and modular organization across FastAPI backend services and React TypeScript components.
-  - Implementation of the timezone-aware as-of cutoff vintage selection algorithm and hand-calculated test fixtures for statistical metrics ($MAE$, $RMSE$, $Bias$, Max Miss).
-  - Implementation of responsive charts using Recharts and Tailwind styling conforming to the approved design specification.
-- **Human Oversight & Validation:** All upstream API parameters, timezone boundary rules, coverage counting conventions, deterministic tie-breaking logic, and metric calculations were verified with real live queries against Elexon BMRS for January 2026.
+- **AI Tool Used:** Google Antigravity AI Coding Assistant powered by Gemini models.
+- **Areas of Assistance:** Architecture design, code implementation, API integration, testing, debugging, and UI development.
+- **Human Oversight:** AI-assisted outputs were reviewed and validated during development. Data handling, forecast-vintage selection, and metric calculations were tested to ensure consistency with the project requirements.
 
 ---
 
