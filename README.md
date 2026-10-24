@@ -288,7 +288,7 @@ Let $F_i$ be the selected forecast generation in MW, and $A_i$ be the actual out
 ### 1. Clone Repository & Setup Environment
 ```bash
 git clone <repo-url>
-cd windiq
+cd data-lab-33
 ```
 
 ### 2. Backend Setup
